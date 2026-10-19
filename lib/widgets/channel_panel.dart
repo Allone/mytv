@@ -18,7 +18,6 @@ class _ChannelPanelState extends State<ChannelPanel> {
   @override
   Widget build(BuildContext context) {
     final iptv = context.watch<IptvProvider>();
-    final player = context.read<PlayerProvider>();
     final groups = iptv.groupList?.groups ?? [];
     final channels = iptv.groupList?.groups
             .where((g) => _group == null || g.name == _group)
@@ -68,7 +67,7 @@ class _ChannelPanelState extends State<ChannelPanel> {
                 selected: iptv.current?.url == c.url,
                 onTap: () {
                   iptv.select(c);
-                  player.play(c);
+                  context.read<PlayerProvider>().play(c);
                 },
               );
             },
