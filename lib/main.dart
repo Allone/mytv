@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:provider/provider.dart';
@@ -13,14 +14,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
   await SP.init();
-  try {
-    await windowManager.ensureInitialized();
-    const options = WindowOptions(size: Size(1280, 720), center: true, title: 'MyTV');
-    await windowManager.waitUntilReadyToShow(options, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
-  } catch (_) {}
+  if (!kIsWeb) {
+    try {
+      await windowManager.ensureInitialized();
+      const options = WindowOptions(size: Size(1280, 720), center: true, title: 'MyTV');
+      await windowManager.waitUntilReadyToShow(options, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    } catch (_) {}
+  }
   runApp(
     MultiProvider(
       providers: [
