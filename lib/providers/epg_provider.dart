@@ -26,12 +26,7 @@ class EpgProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final channels = <String>[];
-      for (final c in groupList?.iptvList ?? <Iptv>[]) {
-        channels.add(c.name);
-        if (c.tvgId != null && c.tvgId!.isNotEmpty) channels.add(c.tvgId!);
-      }
-      _epgList = await _repo.getEpgList(url, filteredChannels: channels);
+      _epgList = await _repo.getEpgList(url);
     } catch (_) {
       _epgList = const EpgList();
     } finally {
@@ -42,16 +37,34 @@ class EpgProvider extends ChangeNotifier {
 
   Epg? epgFor(Iptv channel) {
     final list = _epgList?.epgs ?? [];
-    // 优先 tvg-id 匹配
+    // 1. tvg-id 精确匹配
     if (channel.tvgId != null && channel.tvgId!.isNotEmpty) {
       for (final e in list) {
         if (e.channelId == channel.tvgId) return e;
       }
     }
-    // 其次频道名称匹配
+    // 2. 频道名称精确匹配
     for (final e in list) {
       if (e.channelName == channel.name) return e;
     }
+    // 3. 归一化模糊匹配（去空格、连字符、HD/高清等）
+    final target = _normalize(channel.name);
+    for (final e in list) {
+      if (_normalize(e.channelName) == target) return e;
+    }
     return null;
+  }
+
+  String _normalize(String s) {
+    return s
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-_]+'), '')
+        .replaceAll('高清', '')
+        .replaceAll('标清', '')
+        .replaceAll('超清', '')
+        .replaceAll('频道', '')
+        .replaceAll('hd', '')
+        .replaceAll('sd', '')
+        .replaceAll('cctv', 'cctv');
   }
 }
