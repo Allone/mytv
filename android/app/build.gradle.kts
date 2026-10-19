@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "top.yogiczy.mytv"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
