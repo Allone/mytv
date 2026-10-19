@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/iptv_provider.dart';
 import '../providers/epg_provider.dart';
+import '../providers/settings_provider.dart';
 import '../widgets/channel_panel.dart';
 import '../widgets/player_area.dart';
 import '../widgets/epg_panel.dart';
+import '../widgets/classic_panel.dart';
 import 'import_dialog.dart';
 import 'settings_screen.dart';
 
@@ -16,22 +18,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool _classicOpen = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final iptv = context.read<IptvProvider>();
       final epg = context.read<EpgProvider>();
+      final settings = context.read<SettingsProvider>();
+      if (settings.uiUseClassicPanel) {
+        setState(() => _classicOpen = true);
+      }
       iptv.load().then((_) => epg.load(iptv.groupList));
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+    final classic = settings.uiUseClassicPanel;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('MyTV'),
         actions: [
+          if (classic)
+            IconButton(
+              icon: const Icon(Icons.grid_view),
+              tooltip: '经典选台',
+              onPressed: () => setState(() => _classicOpen = !_classicOpen),
+            ),
           IconButton(
             icon: const Icon(Icons.playlist_add),
             tooltip: '导入直播源',
@@ -49,6 +66,19 @@ class _HomeScreenState extends State<HomeScreen> {
           final iptv = context.watch<IptvProvider>();
           if (iptv.loading) return const Center(child: CircularProgressIndicator());
           if (iptv.error != null) return Center(child: Text('加载失败: ${iptv.error}'));
+
+          if (classic) {
+            return Stack(
+              children: [
+                Positioned.fill(child: PlayerArea()),
+                if (_classicOpen)
+                  Positioned.fill(
+                    child: ClassicPanel(onClose: () => setState(() => _classicOpen = false)),
+                  ),
+              ],
+            );
+          }
+
           final wide = constraints.maxWidth >= 900;
           if (wide) {
             return Row(
