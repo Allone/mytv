@@ -89,7 +89,12 @@ class _WebVideoPlayerState extends State<WebVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
+    // 当有新的路由（设置页/对话框）覆盖时，隐藏原生 video，避免遮挡 Flutter UI
+    final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+    _video.style.display = isCurrent ? 'block' : 'none';
+    if (isCurrent) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _updatePosition());
+    }
     return SizedBox.expand(
       key: _key,
       child: const ColoredBox(color: Colors.black),
