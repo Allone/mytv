@@ -32,11 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final iptv = context.read<IptvProvider>();
       final epg = context.read<EpgProvider>();
-      final settings = context.read<SettingsProvider>();
-      if (settings.uiUseClassicPanel) {
-        setState(() => _classicOpen = true);
-        context.read<PlayerProvider>().setWebVideoVisible(false);
-      }
       iptv.load().then((_) => epg.load(iptv.groupList));
     });
   }
@@ -88,7 +83,12 @@ class _HomeScreenState extends State<HomeScreen> {
           if (classic) {
             return Stack(
               children: [
-                Positioned.fill(child: PlayerArea()),
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () => _setClassicOpen(true),
+                    child: PlayerArea(),
+                  ),
+                ),
                 if (_classicOpen)
                   Positioned.fill(
                     child: ClassicPanel(onClose: () => _setClassicOpen(false)),
