@@ -43,12 +43,18 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('MyTV'),
         actions: [
-          if (classic)
-            IconButton(
-              icon: const Icon(Icons.grid_view),
-              tooltip: '经典选台',
-              onPressed: () => setState(() => _classicOpen = !_classicOpen),
-            ),
+          IconButton(
+            icon: const Icon(Icons.grid_view),
+            tooltip: '经典选台',
+            onPressed: () {
+              if (!classic) {
+                context.read<SettingsProvider>().uiUseClassicPanel = true;
+                setState(() => _classicOpen = true);
+              } else {
+                setState(() => _classicOpen = !_classicOpen);
+              }
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.playlist_add),
             tooltip: '导入直播源',
