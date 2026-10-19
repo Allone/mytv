@@ -14,8 +14,10 @@ class SP {
   static Future<void> _sd(String k, double v) => _sp.setDouble(k, v);
 
   // IPTV
-  static String get iptvSourceUrl => _s('iptv_source_url', 'http://1.2.3.4/live.m3u');
+  static const String defaultIptvSourceUrl = 'http://1.2.3.4/live.m3u';
+  static String get iptvSourceUrl => _s('iptv_source_url', defaultIptvSourceUrl);
   static set iptvSourceUrl(String v) => _ss('iptv_source_url', v);
+  static bool get isDefaultSource => iptvSourceUrl == defaultIptvSourceUrl;
 
   static int get iptvSourceCacheTime => _i('iptv_source_cache_time', 86400000);
   static set iptvSourceCacheTime(int v) => _si('iptv_source_cache_time', v);

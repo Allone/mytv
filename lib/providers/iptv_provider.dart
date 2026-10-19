@@ -16,6 +16,9 @@ class IptvProvider extends ChangeNotifier {
   Iptv? _current;
   Iptv? get current => _current;
 
+  static const String defaultSourceHint =
+      '当前使用的是默认示例直播源，无法加载。\n请点击「导入直播源」添加你的 M3U 列表地址。';
+
   Future<void> load({bool forceRefresh = false}) async {
     _loading = true;
     _error = null;
@@ -25,17 +28,35 @@ class IptvProvider extends ChangeNotifier {
         SP.iptvSourceUrl,
         simplify: SP.iptvSourceSimplify,
       );
-      // restore last channel
+      // 恢复上次播放的频道；找不到时默认播放列表第一个频道
+      _current = null;
       final last = SP.iptvLastChannel;
-      if (last != null && _groupList != null) {
+      Iptv? first;
+      if (_groupList != null) {
+        outer:
         for (final g in _groupList!.groups) {
           for (final c in g.iptvList) {
-            if (c.url == last) _current = c;
+            first ??= c;
+            if (last != null && c.url == last) {
+              _current = c;
+              break outer;
+            }
           }
         }
       }
+      _current ??= first;
+      if (_current != null) SP.iptvLastChannel = _current!.url;
+
+      if (_groupList == null || _groupList!.groups.isEmpty) {
+        _error = SP.isDefaultSource
+            ? defaultSourceHint
+            : '直播源解析成功，但没有可用频道，请检查列表内容。';
+      }
     } catch (e) {
-      _error = e.toString();
+      _current = null;
+      _error = SP.isDefaultSource
+          ? defaultSourceHint
+          : '加载失败：$e\n请检查直播源地址是否可访问。';
     } finally {
       _loading = false;
       notifyListeners();

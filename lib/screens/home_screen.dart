@@ -32,7 +32,14 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final iptv = context.read<IptvProvider>();
       final epg = context.read<EpgProvider>();
-      iptv.load().then((_) => epg.load(iptv.groupList));
+      iptv.load().then((_) {
+        epg.load(iptv.groupList);
+        if (!mounted) return;
+        final c = iptv.current;
+        if (iptv.error == null && c != null) {
+          context.read<PlayerProvider>().play(c);
+        }
+      });
     });
   }
 
@@ -72,7 +79,31 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, constraints) {
           final iptv = context.watch<IptvProvider>();
           if (iptv.loading) return const Center(child: CircularProgressIndicator());
-          if (iptv.error != null) return Center(child: Text('加载失败: ${iptv.error}'));
+          if (iptv.error != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.signal_wifi_off, size: 48, color: Colors.white38),
+                    const SizedBox(height: 12),
+                    Text(
+                      iptv.error!,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      icon: const Icon(Icons.playlist_add),
+                      label: const Text('导入直播源'),
+                      onPressed: () => showDialog(context: context, builder: (_) => const ImportDialog()),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
           if (classic) {
             return Stack(

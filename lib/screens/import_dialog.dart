@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/iptv_provider.dart';
 import '../providers/epg_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/player_provider.dart';
 
 class ImportDialog extends StatefulWidget {
   const ImportDialog({super.key});
@@ -31,21 +32,31 @@ class _ImportDialogState extends State<ImportDialog> {
           onPressed: _loading
               ? null
               : () async {
+                  final url = _urlCtrl.text.trim();
+                  if (url.isEmpty) {
+                    setState(() => _error = '请输入直播源链接');
+                    return;
+                  }
                   setState(() { _loading = true; _error = null; });
-                  try {
-                    final iptv = context.read<IptvProvider>();
-                    await iptv.load(forceRefresh: true);
-                    if (!context.mounted) return;
-                    // override source url
-                    context.read<SettingsProvider>().iptvSourceUrl = _urlCtrl.text.trim();
-                    await iptv.load(forceRefresh: true);
-                    if (!context.mounted) return;
-                    await context.read<EpgProvider>().load(iptv.groupList);
-                    if (context.mounted) Navigator.pop(context);
-                  } catch (e) {
-                    setState(() => _error = e.toString());
-                  } finally {
-                    if (mounted) setState(() => _loading = false);
+                  // override source url
+                  context.read<SettingsProvider>().iptvSourceUrl = url;
+                  final iptv = context.read<IptvProvider>();
+                  await iptv.load(forceRefresh: true);
+                  if (!mounted) return;
+                  if (iptv.error != null) {
+                    setState(() { _error = iptv.error; _loading = false; });
+                    return;
+                  }
+                  if (!context.mounted) return;
+                  await context.read<EpgProvider>().load(iptv.groupList);
+                  if (!mounted) return;
+                  setState(() => _loading = false);
+                  final c = iptv.current;
+                  if (c != null && context.mounted) {
+                    context.read<PlayerProvider>().play(c);
+                    Navigator.pop(context);
+                  } else {
+                    setState(() => _error = '导入成功，但列表中没有可用频道');
                   }
                 },
           child: _loading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('导入'),
