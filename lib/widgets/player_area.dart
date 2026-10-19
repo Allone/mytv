@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:provider/provider.dart';
 import '../providers/player_provider.dart';
+import 'web_video_player.dart';
 
 class PlayerArea extends StatelessWidget {
   const PlayerArea({super.key});
@@ -15,7 +17,9 @@ class PlayerArea extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           if (player.current != null)
-            Video(controller: player.controller, controls: MaterialVideoControls)
+            kIsWeb
+                ? WebVideoPlayer(url: player.current!.url)
+                : Video(controller: player.controller, controls: MaterialVideoControls)
           else
             const Center(child: Text('请选择频道', style: TextStyle(color: Colors.white70))),
           if (player.current != null)

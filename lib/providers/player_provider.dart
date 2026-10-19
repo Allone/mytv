@@ -4,8 +4,11 @@ import 'package:media_kit_video/media_kit_video.dart';
 import '../models/iptv.dart';
 
 class PlayerProvider extends ChangeNotifier {
-  late final Player player;
-  late final VideoController controller;
+  Player? _player;
+  VideoController? _controller;
+
+  Player get player => _player!;
+  VideoController get controller => _controller!;
 
   Iptv? _current;
   bool _buffering = false;
@@ -13,11 +16,13 @@ class PlayerProvider extends ChangeNotifier {
   bool _playing = false;
 
   PlayerProvider() {
-    player = Player();
-    controller = VideoController(player);
-    player.stream.playing.listen((v) { _playing = v; notifyListeners(); });
-    player.stream.buffering.listen((v) { _buffering = v; notifyListeners(); });
-    player.stream.error.listen((e) { if (e.isNotEmpty) { _error = e; notifyListeners(); } });
+    if (!kIsWeb) {
+      _player = Player();
+      _controller = VideoController(_player!);
+      _player!.stream.playing.listen((v) { _playing = v; notifyListeners(); });
+      _player!.stream.buffering.listen((v) { _buffering = v; notifyListeners(); });
+      _player!.stream.error.listen((e) { if (e.isNotEmpty) { _error = e; notifyListeners(); } });
+    }
   }
 
   Iptv? get current => _current;
@@ -29,9 +34,10 @@ class PlayerProvider extends ChangeNotifier {
     _current = c;
     _error = null;
     notifyListeners();
+    if (kIsWeb) return; // Web 使用 <video> 组件播放
     try {
-      await player.open(Media(c.url)).timeout(const Duration(seconds: 15));
-      await player.play().timeout(const Duration(seconds: 15));
+      await _player!.open(Media(c.url)).timeout(const Duration(seconds: 15));
+      await _player!.play().timeout(const Duration(seconds: 15));
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -39,31 +45,30 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   Future<void> toggle() async {
+    if (kIsWeb || _player == null) return;
     if (_playing) {
-      await player.pause();
+      await _player!.pause();
     } else {
-      await player.play();
+      await _player!.play();
     }
   }
 
   Future<void> stop() async {
-    await player.stop();
+    if (!kIsWeb && _player != null) await _player!.stop();
     _current = null;
     notifyListeners();
   }
 
   Future<void> setVolume(double v) async {
-    if (kIsWeb) {
-      return;
-    }
+    if (kIsWeb || _player == null) return;
     try {
-      await player.setVolume(v * 100).timeout(const Duration(seconds: 3));
+      await _player!.setVolume(v * 100).timeout(const Duration(seconds: 3));
     } catch (_) {}
   }
 
   @override
   void dispose() {
-    player.dispose();
+    _player?.dispose();
     super.dispose();
   }
 }

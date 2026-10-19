@@ -28,8 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final iptv = context.watch<IptvProvider>();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('MyTV'),
@@ -48,13 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          final iptv = context.watch<IptvProvider>();
+          if (iptv.loading) return const Center(child: CircularProgressIndicator());
+          if (iptv.error != null) return Center(child: Text('加载失败: ${iptv.error}'));
           final wide = constraints.maxWidth >= 900;
-          if (iptv.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (iptv.error != null) {
-            return Center(child: Text('加载失败: ${iptv.error}'));
-          }
           if (wide) {
             return Row(
               children: [
@@ -65,7 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       Expanded(child: PlayerArea()),
-                      if (iptv.current != null) EpgPanel(channelName: iptv.current!.name),
+                      if (iptv.current != null)
+                        SizedBox(height: 110, child: EpgPanel(channelName: iptv.current!.name)),
                     ],
                   ),
                 ),

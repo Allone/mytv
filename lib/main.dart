@@ -12,7 +12,9 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
+  if (!kIsWeb) {
+    MediaKit.ensureInitialized();
+  }
   await SP.init();
   if (!kIsWeb) {
     try {
