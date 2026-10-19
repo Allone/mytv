@@ -14,6 +14,14 @@ class PlayerProvider extends ChangeNotifier {
   bool _buffering = false;
   String? _error;
   bool _playing = false;
+  bool _webVideoVisible = true;
+
+  bool get webVideoVisible => _webVideoVisible;
+  void setWebVideoVisible(bool v) {
+    if (_webVideoVisible == v) return;
+    _webVideoVisible = v;
+    notifyListeners();
+  }
 
   PlayerProvider() {
     if (!kIsWeb) {

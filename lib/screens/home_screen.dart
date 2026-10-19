@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/iptv_provider.dart';
 import '../providers/epg_provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/player_provider.dart';
 import '../widgets/channel_panel.dart';
 import '../widgets/player_area.dart';
 import '../widgets/epg_panel.dart';
@@ -20,6 +21,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _classicOpen = false;
 
+  void _setClassicOpen(bool open) {
+    setState(() => _classicOpen = open);
+    context.read<PlayerProvider>().setWebVideoVisible(!open);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final settings = context.read<SettingsProvider>();
       if (settings.uiUseClassicPanel) {
         setState(() => _classicOpen = true);
+        context.read<PlayerProvider>().setWebVideoVisible(false);
       }
       iptv.load().then((_) => epg.load(iptv.groupList));
     });
@@ -38,6 +45,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
     final classic = settings.uiUseClassicPanel;
+    if (!classic && !_classicOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<PlayerProvider>().setWebVideoVisible(true);
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,9 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               if (!classic) {
                 context.read<SettingsProvider>().uiUseClassicPanel = true;
-                setState(() => _classicOpen = true);
+                _setClassicOpen(true);
               } else {
-                setState(() => _classicOpen = !_classicOpen);
+                _setClassicOpen(!_classicOpen);
               }
             },
           ),
@@ -79,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Positioned.fill(child: PlayerArea()),
                 if (_classicOpen)
                   Positioned.fill(
-                    child: ClassicPanel(onClose: () => setState(() => _classicOpen = false)),
+                    child: ClassicPanel(onClose: () => _setClassicOpen(false)),
                   ),
               ],
             );
