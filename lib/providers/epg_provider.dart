@@ -13,6 +13,7 @@ class EpgProvider extends ChangeNotifier {
   bool get loading => _loading;
 
   Future<void> load(IptvGroupList? groupList) async {
+    if (kIsWeb) return; // Web 端 EPG 受 CORS 限制，跳过
     if (!SP.epgEnable) return;
     _loading = true;
     notifyListeners();
