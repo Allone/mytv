@@ -52,8 +52,8 @@ class PlayerProvider extends ChangeNotifier {
     try {
       // 允许对不可 seek 的直播流进行 seek，避免 mpv 报错
       final platform = _player!.platform;
-      if (platform is NativePlayer) {
-        await platform.setProperty('force-seekable', 'yes');
+      if (platform != null) {
+        await (platform as dynamic).setProperty('force-seekable', 'yes');
       }
     } catch (_) {}
     try {
