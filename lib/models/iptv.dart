@@ -4,6 +4,7 @@ class Iptv {
   final String url;
   final String? logo;
   final String? group;
+  final String? tvgId;
   final Map<String, String> attributes;
 
   const Iptv({
@@ -12,6 +13,7 @@ class Iptv {
     required this.url,
     this.logo,
     this.group,
+    this.tvgId,
     this.attributes = const {},
   });
 }
@@ -24,7 +26,8 @@ class IptvGroup {
 
 class IptvGroupList {
   final List<IptvGroup> groups;
-  const IptvGroupList({this.groups = const []});
+  final String? epgUrl;
+  const IptvGroupList({this.groups = const [], this.epgUrl});
   List<Iptv> get iptvList => groups.expand((g) => g.iptvList).toList();
   int get size => groups.length;
 }

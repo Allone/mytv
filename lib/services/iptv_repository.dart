@@ -14,7 +14,7 @@ class IptvRepository {
         final list = g.iptvList.where((i) => i.name.toLowerCase().startsWith('cctv') || i.name.endsWith('卫视')).toList();
         return IptvGroup(name: g.name, iptvList: list);
       }).where((g) => g.iptvList.isNotEmpty).toList();
-      return IptvGroupList(groups: filtered);
+      return IptvGroupList(groups: filtered, epgUrl: groupList.epgUrl);
     }
     return groupList;
   }

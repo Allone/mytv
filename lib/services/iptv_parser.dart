@@ -18,11 +18,19 @@ class M3uIptvParser implements IptvParser {
     String? currentGroup;
     Map<String, String> attrs = {};
     String? name;
+    String? epgUrl;
 
     for (final raw in lines) {
       final line = raw.trim();
       if (line.isEmpty) continue;
-      if (line.startsWith('#EXTM3U')) continue;
+      if (line.startsWith('#EXTM3U')) {
+        // 解析 url-tvg / x-tvg-url 节目单地址
+        final m = RegExp(r'(url-tvg|x-tvg-url)\s*=\s*"([^"]*)"').firstMatch(line);
+        if (m != null && m.group(2)!.isNotEmpty) {
+          epgUrl = m.group(2);
+        }
+        continue;
+      }
       if (line.startsWith('#EXTINF')) {
         attrs = _parseExtInf(line);
         name = attrs.remove('__name__');
@@ -43,6 +51,7 @@ class M3uIptvParser implements IptvParser {
         url: url,
         logo: logo,
         group: group,
+        tvgId: attrs['tvg-id'] ?? attrs['tvg_id'],
         attributes: Map.from(attrs),
       ));
       attrs = {};
@@ -59,7 +68,7 @@ class M3uIptvParser implements IptvParser {
     for (final e in groupMap.entries) {
       groups.add(IptvGroup(name: e.key, iptvList: e.value));
     }
-    return IptvGroupList(groups: groups);
+    return IptvGroupList(groups: groups, epgUrl: epgUrl);
   }
 
   Map<String, String> _parseExtInf(String line) {

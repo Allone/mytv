@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Expanded(child: PlayerArea()),
                       if (iptv.current != null)
-                        SizedBox(height: 110, child: EpgPanel(channelName: iptv.current!.name)),
+                        SizedBox(height: 110, child: EpgPanel(channel: iptv.current!)),
                     ],
                   ),
                 ),
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return Column(
             children: [
               SizedBox(height: 240, child: PlayerArea()),
-              if (iptv.current != null) SizedBox(height: 80, child: EpgPanel(channelName: iptv.current!.name)),
+              if (iptv.current != null) SizedBox(height: 80, child: EpgPanel(channel: iptv.current!)),
               Expanded(child: ChannelPanel()),
             ],
           );

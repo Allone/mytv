@@ -12,8 +12,9 @@ class EpgProgrammeList {
 
 class Epg {
   final String channelName;
+  final String channelId;
   final EpgProgrammeList programmes;
-  const Epg({required this.channelName, required this.programmes});
+  const Epg({required this.channelName, this.channelId = '', required this.programmes});
 }
 
 class EpgList {

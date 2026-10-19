@@ -25,7 +25,7 @@ class _ClassicPanelState extends State<ClassicPanel> {
     final selectedGroup = _group ?? (groups.isNotEmpty ? groups.first.name : null);
     final channels = groups.where((g) => g.name == selectedGroup).expand((g) => g.iptvList).toList();
     final current = iptv.current;
-    final currentEpg = current == null ? null : epg.epgFor(current.name);
+    final currentEpg = current == null ? null : epg.epgFor(current);
 
     return Container(
       color: Colors.black.withValues(alpha: 0.92),

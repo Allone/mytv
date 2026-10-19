@@ -14,8 +14,8 @@ class EpgRepository {
     for (final ch in doc.findAllElements('channel')) {
       final id = ch.getAttribute('id') ?? '';
       final name = ch.getElement('display-name')?.innerText ?? id;
-      if (filteredChannels.isNotEmpty && !filteredChannels.contains(name)) continue;
-      epgMap[id] = Epg(channelName: name, programmes: const EpgProgrammeList());
+      if (filteredChannels.isNotEmpty && !filteredChannels.contains(name) && !filteredChannels.contains(id)) continue;
+      epgMap[id] = Epg(channelName: name, channelId: id, programmes: const EpgProgrammeList());
     }
 
     for (final prog in doc.findAllElements('programme')) {
@@ -27,7 +27,11 @@ class EpgRepository {
       final epg = epgMap[channelId]!;
       final programmes = List<EpgProgramme>.from(epg.programmes.programmes)
         ..add(EpgProgramme(startAt: _parseTime(start), endAt: _parseTime(stop), title: title));
-      epgMap[channelId] = Epg(channelName: epg.channelName, programmes: EpgProgrammeList(programmes: programmes));
+      epgMap[channelId] = Epg(
+        channelName: epg.channelName,
+        channelId: epg.channelId,
+        programmes: EpgProgrammeList(programmes: programmes),
+      );
     }
 
     return EpgList(epgs: epgMap.values.toList());
