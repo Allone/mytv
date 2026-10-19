@@ -1,7 +1,7 @@
 name: mytv
 description: 全平台 MyTV，借鉴 mytv-android 的 IPTV 播放体验
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: '>=3.7.0 <4.0.0'
