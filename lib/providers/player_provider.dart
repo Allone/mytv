@@ -29,7 +29,13 @@ class PlayerProvider extends ChangeNotifier {
       _controller = VideoController(_player!);
       _player!.stream.playing.listen((v) { _playing = v; notifyListeners(); });
       _player!.stream.buffering.listen((v) { _buffering = v; notifyListeners(); });
-      _player!.stream.error.listen((e) { if (e.isNotEmpty) { _error = e; notifyListeners(); } });
+      _player!.stream.error.listen((e) {
+        if (e.isEmpty) return;
+        // mpv 对不可 seek 流的提示，不影响正常播放，不作为致命错误展示
+        if (e.contains('force-seekable') || e.contains('Cannot seek')) return;
+        _error = e;
+        notifyListeners();
+      });
     }
   }
 
@@ -43,6 +49,13 @@ class PlayerProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     if (kIsWeb) return; // Web 使用 <video> 组件播放
+    try {
+      // 允许对不可 seek 的直播流进行 seek，避免 mpv 报错
+      final platform = _player!.platform;
+      if (platform is NativePlayer) {
+        await platform.setProperty('force-seekable', 'yes');
+      }
+    } catch (_) {}
     try {
       await _player!.open(Media(c.url)).timeout(const Duration(seconds: 15));
       await _player!.play().timeout(const Duration(seconds: 15));
