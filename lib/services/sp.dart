@@ -39,6 +39,9 @@ class SP {
   static String get epgXmlUrl => _s('epg_xml_url', 'http://epg.51zmt.top:8000/e.xml.gz');
   static set epgXmlUrl(String v) => _ss('epg_xml_url', v);
 
+  static bool get epgPreferM3u => _b('epg_prefer_m3u', true);
+  static set epgPreferM3u(bool v) => _sb('epg_prefer_m3u', v);
+
   // UI
   static double get uiDensityScale => _d('ui_density_scale', 1.0);
   static set uiDensityScale(double v) => _sd('ui_density_scale', v);

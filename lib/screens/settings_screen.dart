@@ -45,6 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final sp = context.watch<SettingsProvider>();
+    final epg = context.watch<EpgProvider>();
     return Scaffold(
       appBar: AppBar(title: const Text('设置')),
       body: ListView(
@@ -76,9 +77,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '提示：若 M3U 头部包含 url-tvg / x-tvg-url，将优先使用 M3U 自带的节目单地址；否则使用此处填写的地址。',
+            '提示：默认优先使用 M3U 头部自带的 url-tvg / x-tvg-url；未提供时使用此处填写的地址。',
             style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
           ),
+          SwitchListTile(
+            title: const Text('优先使用 M3U 自带节目单'),
+            subtitle: const Text('关闭后始终使用上方自定义地址'),
+            value: sp.epgPreferM3u,
+            onChanged: (v) => sp.epgPreferM3u = v,
+          ),
+          if (epg.activeUrl != null)
+            ListTile(
+              title: const Text('当前节目单来源'),
+              subtitle: Text(epg.activeUrl!, style: const TextStyle(fontSize: 12)),
+            ),
           SwitchListTile(
             title: const Text('启用节目单'),
             value: sp.epgEnable,

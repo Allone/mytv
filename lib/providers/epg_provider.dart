@@ -17,10 +17,11 @@ class EpgProvider extends ChangeNotifier {
   Future<void> load(IptvGroupList? groupList) async {
     if (kIsWeb) return; // Web 端 EPG 受 CORS 限制，跳过
     if (!SP.epgEnable) return;
-    // 优先使用 M3U 头部自带的 url-tvg；否则使用设置中的自定义地址
-    final url = (groupList?.epgUrl != null && groupList!.epgUrl!.isNotEmpty)
-        ? groupList.epgUrl!
-        : SP.epgXmlUrl;
+    // 默认优先使用 M3U 头部自带的 url-tvg / x-tvg-url；
+    // 若关闭该选项或 M3U 未提供，则使用设置中的自定义地址。
+    final m3uUrl = groupList?.epgUrl;
+    final hasM3uUrl = m3uUrl != null && m3uUrl.isNotEmpty;
+    final url = (SP.epgPreferM3u && hasM3uUrl) ? m3uUrl : SP.epgXmlUrl;
     if (url.isEmpty) return;
     _activeUrl = url;
     _loading = true;

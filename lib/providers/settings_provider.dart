@@ -17,6 +17,9 @@ class SettingsProvider extends ChangeNotifier {
   String get epgXmlUrl => SP.epgXmlUrl;
   set epgXmlUrl(String v) { SP.epgXmlUrl = v; notifyListeners(); }
 
+  bool get epgPreferM3u => SP.epgPreferM3u;
+  set epgPreferM3u(bool v) { SP.epgPreferM3u = v; notifyListeners(); }
+
   double get uiDensityScale => SP.uiDensityScale;
   set uiDensityScale(double v) { SP.uiDensityScale = v; notifyListeners(); }
 

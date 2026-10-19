@@ -25,9 +25,9 @@ class M3uIptvParser implements IptvParser {
       if (line.isEmpty) continue;
       if (line.startsWith('#EXTM3U')) {
         // 解析 url-tvg / x-tvg-url 节目单地址
-        final m = RegExp(r'(url-tvg|x-tvg-url)\s*=\s*"([^"]*)"').firstMatch(line);
+        final m = RegExp(r'(url-tvg|x-tvg-url|tvg-url)\s*=\s*"([^"]*)"').firstMatch(line);
         if (m != null && m.group(2)!.isNotEmpty) {
-          epgUrl = m.group(2);
+          epgUrl = m.group(2)!.split(',').first.trim();
         }
         continue;
       }
